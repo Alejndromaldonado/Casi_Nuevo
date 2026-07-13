@@ -283,7 +283,7 @@
             const isReserved = product.estado_disponibilidad === 'reservado';
             
             const [showShare, setShowShare] = React.useState(false);
-            const shareUrl = `${window.location.origin}${window.location.pathname}#product-${product.id}`;
+            const shareUrl = `${window.location.origin}/product/${product.id}`;
             const shareText = `¡Mira esta oportunidad en Casi Nuevo! 📦\n\n*${product.titulo}*\nPrecio: ${formatCOP(product.precio)}\n\n${product.descripcion || ''}\n\nVer más fotos y detalles aquí: ${shareUrl}`;
             const waShareLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
             const fbShareLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
