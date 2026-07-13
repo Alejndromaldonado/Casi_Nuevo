@@ -249,7 +249,7 @@
                             ¡Gran Venta de Garaje!
                         </h1>
                         <p className="text-lg sm:text-xl text-primary-100 max-w-2xl mb-8 leading-relaxed font-light">
-                            Vendo todos los muebles y electrodomésticos de mi apartamento por motivo de viaje y mudanza. Precios de oportunidad, entrega inmediata.
+                            Vendo todos los muebles y electrodomésticos de mi apartamento. Precios de oportunidad, entrega inmediata.
                         </p>
 
                         <div className="flex gap-3 sm:gap-4 mb-8">
@@ -409,6 +409,7 @@
 
         // Modal Detalle
         const ProductModal = ({ product, onClose }) => {
+            const [activeIndex, setActiveIndex] = React.useState(0);
             useLockBodyScroll(!!product);
             if (!product) return null;
 
@@ -426,27 +427,73 @@
                 return () => window.removeEventListener('keydown', handleEsc);
             }, [onClose]);
 
+            // Obtener array de imágenes
+            const images = product.imagenes_urls && product.imagenes_urls.length > 0 
+                ? product.imagenes_urls 
+                : (product.url_imagen_cloudinary ? [product.url_imagen_cloudinary] : ["https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&q=80&w=800"]);
+
             return (
                 <div className="fixed inset-0 bg-primary-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in" onClick={onClose}>
                     <div 
                         className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row animate-slide-up" 
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {/* Imagen de detalle */}
-                        <div className="w-full md:w-1/2 relative bg-primary-50">
+                        {/* Carusel de detalle */}
+                        <div className="w-full md:w-1/2 relative bg-primary-50 min-h-[300px] flex items-center justify-center overflow-hidden">
                             {isSold && (
                                 <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-md uppercase tracking-wider">
                                     Vendido
                                 </div>
                             )}
+                            
+                            {/* Imagen activa */}
                             <img 
-                                src={product.url_imagen_cloudinary || "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&q=80&w=800"} 
-                                alt={product.titulo} 
-                                className="w-full h-64 md:h-full object-cover" 
+                                src={images[activeIndex]} 
+                                alt={`${product.titulo} - ${activeIndex + 1}`} 
+                                className="w-full h-full object-cover min-h-[300px] max-h-[450px]" 
                             />
-                            <div className="absolute top-4 right-4 bg-primary-900/80 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                            
+                            {/* Categoría */}
+                            <div className="absolute top-4 right-4 bg-primary-900/80 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider z-10">
                                 {product.categoria}
                             </div>
+
+                            {/* Controles de navegación */}
+                            {images.length > 1 && (
+                                <>
+                                    <button 
+                                        onClick={() => setActiveIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))}
+                                        className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/75 text-white hover:scale-105 transition-all z-10 shadow"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                                        </svg>
+                                    </button>
+                                    <button 
+                                        onClick={() => setActiveIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/75 text-white hover:scale-105 transition-all z-10 shadow"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                </>
+                            )}
+
+                            {/* Indicadores de puntos */}
+                            {images.length > 1 && (
+                                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 bg-black/35 backdrop-blur-sm py-1 px-2.5 rounded-full">
+                                    {images.map((_, idx) => (
+                                        <button 
+                                            key={idx} 
+                                            onClick={() => setActiveIndex(idx)}
+                                            className={`w-2 h-2 rounded-full transition-all ${
+                                                activeIndex === idx ? 'bg-white w-4' : 'bg-white/50 hover:bg-white/80'
+                                            }`}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {/* Contenido detalle */}
@@ -745,14 +792,13 @@
             );
         };
 
-        // Formulario CRUD Crear/Editar
         const ProductForm = ({ product, onCancel, onSuccess }) => {
             const [titulo, setTitulo] = React.useState('');
             const [descripcion, setDescripcion] = React.useState('');
             const [precio, setPrecio] = React.useState('');
             const [categoria, setCategoria] = React.useState('Muebles');
             const [estado, setEstado] = React.useState('disponible');
-            const [imageUrl, setImageUrl] = React.useState('');
+            const [imageUrls, setImageUrls] = React.useState([]);
             const [uploading, setUploading] = React.useState(false);
             const [saving, setSaving] = React.useState(false);
 
@@ -763,13 +809,23 @@
                     setPrecio(product.precio);
                     setCategoria(product.categoria);
                     setEstado(product.estado_disponibilidad);
-                    setImageUrl(product.url_imagen_cloudinary || '');
+                    if (product.imagenes_urls && product.imagenes_urls.length > 0) {
+                        setImageUrls(product.imagenes_urls);
+                    } else if (product.url_imagen_cloudinary) {
+                        setImageUrls([product.url_imagen_cloudinary]);
+                    } else {
+                        setImageUrls([]);
+                    }
                 }
             }, [product]);
 
             const handleImageUpload = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
+                if (imageUrls.length >= 5) {
+                    alert('Puedes subir hasta 5 fotos por producto.');
+                    return;
+                }
                 setUploading(true);
 
                 try {
@@ -786,26 +842,37 @@
                     if (data.secure_url) {
                         // Aplicar transformaciones Cloudinary para optimización (max 800px ancho, auto webp, auto calidad)
                         const optimizedUrl = data.secure_url.replace('/upload/', '/upload/w_800,f_auto,q_auto/');
-                        setImageUrl(optimizedUrl);
+                        setImageUrls([...imageUrls, optimizedUrl]);
                     }
                 } catch (err) {
                     console.error('Error uploading to Cloudinary:', err);
                     alert('Error al subir la imagen a Cloudinary');
                 }
                 setUploading(false);
+                e.target.value = '';
+            };
+
+            const removeImage = (indexToRemove) => {
+                setImageUrls(imageUrls.filter((_, idx) => idx !== indexToRemove));
             };
 
             const handleSubmit = async (e) => {
                 e.preventDefault();
+                if (imageUrls.length === 0) {
+                    alert('Por favor sube al menos una foto del producto.');
+                    return;
+                }
                 setSaving(true);
 
+                const firstImage = imageUrls[0] || '';
                 const productData = {
                     titulo,
                     descripcion,
                     precio: parseFloat(precio),
                     categoria,
                     estado_disponibilidad: estado,
-                    url_imagen_cloudinary: imageUrl
+                    url_imagen_cloudinary: firstImage,
+                    imagenes_urls: imageUrls
                 };
 
                 let res;
@@ -903,13 +970,14 @@
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-primary-600 mb-1 uppercase tracking-wide">Foto del Artículo</label>
+                                <label className="block text-xs font-semibold text-primary-600 mb-1 uppercase tracking-wide">Foto del Artículo {imageUrls.length < 5 ? `(${imageUrls.length + 1}/5)` : '(Límite alcanzado)'}</label>
                                 <input 
                                     type="file" 
                                     accept="image/*" 
                                     capture="environment"
                                     onChange={handleImageUpload}
-                                    className="w-full text-xs text-primary-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-primary-100 file:text-primary-800 hover:file:bg-primary-200 cursor-pointer"
+                                    disabled={imageUrls.length >= 5 || uploading}
+                                    className="w-full text-xs text-primary-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-primary-100 file:text-primary-800 hover:file:bg-primary-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                 />
                             </div>
                         </div>
@@ -920,20 +988,32 @@
                             </div>
                         )}
 
-                        {imageUrl && (
-                            <div className="relative w-32 h-24 rounded-lg overflow-hidden border border-primary-100">
-                                <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                                <button 
-                                    type="button" 
-                                    onClick={() => setImageUrl('')}
-                                    className="absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-md"
-                                >
-                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-                        )}
+                        <div className="mt-4">
+                            <label className="block text-xs font-semibold text-primary-600 mb-2 uppercase tracking-wide">Fotos Subidas ({imageUrls.length}/5)</label>
+                            {imageUrls.length === 0 ? (
+                                <p className="text-xs text-primary-400 font-light italic">Ninguna foto seleccionada. Sube al menos una.</p>
+                            ) : (
+                                <div className="flex flex-wrap gap-3">
+                                    {imageUrls.map((url, idx) => (
+                                        <div key={idx} className="relative w-28 h-20 rounded-xl overflow-hidden border border-primary-100 group shadow-sm bg-primary-50">
+                                            <img src={url} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                                            <button 
+                                                type="button" 
+                                                onClick={() => removeImage(idx)}
+                                                className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-md transition-all"
+                                            >
+                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                            <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 text-white text-[8px] rounded font-semibold uppercase">
+                                                {idx === 0 ? 'Portada' : `Foto ${idx + 1}`}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
                         <div className="flex gap-3 justify-end pt-4 border-t border-primary-50">
                             <button 
