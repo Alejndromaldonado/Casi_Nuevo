@@ -49,7 +49,7 @@ test.describe('Casi Nuevo - Public Storefront E2E Tests', () => {
 
     // Verify main Hero heading
     await expect(page.getByRole('heading', { name: /¡Gran Venta de Garaje!/i })).toBeVisible();
-    await expect(page.getByText(/Barcelona/i).first()).toBeVisible();
+    await expect(page.getByText(/apartamento/i).first()).toBeVisible();
   });
 
   test('should load and display mock products in the grid', async ({ page }) => {
