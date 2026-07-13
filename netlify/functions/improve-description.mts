@@ -29,9 +29,18 @@ export default async (req: Request) => {
       });
     }
 
-    const apiKey = Netlify.env.get("GROQ_API_KEY");
+    let apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "API Key de Groq no configurada en Netlify." }), {
+      try {
+        // @ts-ignore
+        apiKey = Netlify.env.get("GROQ_API_KEY");
+      } catch (e) {
+        // Ignore ReferenceError if Netlify is not defined
+      }
+    }
+
+    if (!apiKey) {
+      return new Response(JSON.stringify({ error: "API Key de Groq no configurada en Netlify. process.env keys: " + Object.keys(process.env).join(", ") }), {
         status: 500,
         headers: { 
           "Content-Type": "application/json",
