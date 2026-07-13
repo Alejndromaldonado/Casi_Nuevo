@@ -40,7 +40,7 @@ export default async (req: Request) => {
     }
 
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "API Key de Groq no configurada en Netlify. process.env keys: " + Object.keys(process.env).join(", ") }), {
+      return new Response(JSON.stringify({ error: "API Key de Groq no configurada en Netlify." }), {
         status: 500,
         headers: { 
           "Content-Type": "application/json",
