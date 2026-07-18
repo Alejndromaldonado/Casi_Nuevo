@@ -94,13 +94,13 @@ test.describe('Casi Nuevo - Public Storefront E2E Tests', () => {
     // Select the "Pedir Información" link inside the first card
     const infoLink = card.getByRole('link', { name: /Pedir Información/i });
     const infoHref = await infoLink.getAttribute('href');
-    expect(infoHref).toContain('wa.me/573027271230');
+    expect(infoHref).toContain('wa.me/573508851214');
     expect(infoHref).toContain(encodeURIComponent('Hola, me interesa el producto "Sofá de Tres Puestos".'));
 
     // Select the "Comprar ahora - Tarjeta" link inside the first card
     const payLink = card.getByRole('link', { name: /Comprar ahora - Tarjeta/i });
     const payHref = await payLink.getAttribute('href');
-    expect(payHref).toContain('wa.me/573027271230');
+    expect(payHref).toContain('wa.me/573508851214');
     expect(payHref).toContain(encodeURIComponent('Hola, quiero pagar el "Sofá de Tres Puestos" con tarjeta. Solicito el link de pago.'));
   });
 });
